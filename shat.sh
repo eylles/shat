@@ -1,4 +1,7 @@
 #!/bin/sh
+
+myname=${0##*/}
+
 [ -z "$HIGHLIGHTER" ] && HIGHLIGHTER="$(command -v highlight 2>/dev/null)"
 [ -z "$HIGHLIGHTER" ] && HIGHLIGHTER="$(command -v source-highlight 2>/dev/null)"
 [ -z "$HIGHLIGHTER" ] && { printf '%s\n' "dependencies unmet, install a highlighter program or set the HIGHLIGHTER var"; exit 1; }
