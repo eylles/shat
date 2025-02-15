@@ -2,8 +2,14 @@
 
 myname=${0##*/}
 
-[ -z "$HIGHLIGHTER" ] && HIGHLIGHTER="$(command -v highlight 2>/dev/null)"
-[ -z "$HIGHLIGHTER" ] && HIGHLIGHTER="$(command -v source-highlight 2>/dev/null)"
+# usage: check_cmd command
+#     returns the command if it exists
+check_cmd(){
+    [ "$(command -v "$1" 2>/dev/null)" ] && printf '%s\n' "$1"
+}
+
+[ -z "$HIGHLIGHTER" ] && HIGHLIGHTER="$(check_cmd highlight)"
+[ -z "$HIGHLIGHTER" ] && HIGHLIGHTER="$(check_cmd source-highlight)"
 [ -z "$HIGHLIGHTER" ] && { printf '%s\n' "dependencies unmet, install a highlighter program or set the HIGHLIGHTER var"; exit 1; }
 
 case "$HIGHLIGHTER" in
