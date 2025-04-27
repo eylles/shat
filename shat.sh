@@ -17,12 +17,17 @@ case "$HIGHLIGHTER" in
     *highlight) HIGHLIGHTER="${HIGHLIGHTER} -O ansi --force" ;;
 esac
 
+# the columns on the left of the printable area
+margin=9
+
+# if ran as a preview for fzf use the fzf previe columns
+[ -z "$FZF_PREVIEW_COLUMNS" ] || SHBAT_COLS="$FZF_PREVIEW_COLUMNS"
 if [ -z "$SHBAT_COLS" ]; then
-   clnms="$(tput cols)"
+    clnms=$(( $(tput cols) - margin ))
 else
-   clnms="$SHBAT_COLS"
+    clnms=$(( SHBAT_COLS - margin ))
 fi
-clnms=$((clnms-8))
+
 sepLeft="───────"
 count=1
 while [ "$count" -le "$clnms" ]; do sepRight="${sepRight}─"; count=$((count+1)); done
