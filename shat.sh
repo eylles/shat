@@ -28,6 +28,9 @@ else
     clnms=$(( SHBAT_COLS - margin ))
 fi
 
+ident=""
+name=""
+
 sepLeft="───────"
 count=1
 while [ "$count" -le "$clnms" ]; do sepRight="${sepRight}─"; count=$((count+1)); done
@@ -41,8 +44,10 @@ printseparators() {
 }
 
 prettyprintcmd() {
+    iD="$1"
+    shift 1
     printseparators "top"
-    printf '\033[30;1m%6s %s\033[0m \033[32;1m%s\033[0m \n' "File:" "│" "$*"
+    printf '\033[30;1m%6s %s\033[0m \033[32;1m%s\033[0m \n' "$iD" "│" "$*"
     printseparators "mid"
     num=1
     while IFS= read -r REPLY; do
@@ -51,8 +56,33 @@ prettyprintcmd() {
     printseparators "bot"
 }
 
-if [ "$#" -gt 1 ]; then
-    /bin/cat "$@" | prettyprintcmd "$@"
+tmpfile="${TMPDIR:-/tmp}/${myname}_pipe_$$"
+trap 'rm -f -- $tmpfile' EXIT
+
+if [ "$#" -eq 0 ]; then
+    if [ -t 0 ]; then
+        echo "${myname}: No FILE arguments provided" >&2; exit 1
+    else
+        # Consume stdin and put it in the temporal file
+        cat > "$tmpfile"
+        pipearg=1
+    fi
+fi
+
+for arg in "$@"; do
+    # if it's a pipe then drain it to $tmpfile
+    [ -p "$arg" ] && { pipearg=1; cat "$arg" > "$tmpfile"; };
+done
+
+if [ -z "$pipearg" ]; then
+    [ -z "$ident" ] && ident="File"
+    if [ "$#" -gt 1 ]; then
+        /bin/cat "$@" | prettyprintcmd "$ident" "$@"
+    else
+        $HIGHLIGHTER "$1" | prettyprintcmd "$ident" "$@"
+    fi
 else
-    $HIGHLIGHTER "$1" | prettyprintcmd "$@"
+    [ -z "$ident" ] && ident="Pipe"
+    [ -z "$name" ] && name="${myname}-pipe $$"
+    $HIGHLIGHTER "$tmpfile" | prettyprintcmd "$ident" "$name"
 fi
