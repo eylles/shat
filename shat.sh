@@ -28,6 +28,12 @@ else
     clnms=$(( SHBAT_COLS - margin ))
 fi
 
+# usage: trim_iden "value"
+#     will trim input to 6 chars
+trim_iden() {
+    printf '%.6s\n' "$1"
+}
+
 ident=""
 name=""
 
