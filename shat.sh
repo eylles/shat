@@ -36,6 +36,15 @@ trim_iden() {
 
 ident=""
 name=""
+while getopts "I:N:" opt; do case "${opt}" in
+    I) ident=$(trim_iden "$OPTARG") ;;
+    N) name="$OPTARG" ;;
+    *)
+        printf '%s: invalid option %s\n' "${myname}" "$opt" >&2
+        exit 1
+    ;;
+esac done
+shift $(( OPTIND -1 ))
 
 sepLeft="───────"
 count=1
