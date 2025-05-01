@@ -34,6 +34,10 @@ trim_iden() {
     printf '%.6s\n' "$1"
 }
 
+show_usage () {
+    printf 'usage: %s [OPTION] [FILE]\n' "${myname}"
+}
+
 ident=""
 name=""
 while getopts "I:N:" opt; do case "${opt}" in
@@ -41,6 +45,7 @@ while getopts "I:N:" opt; do case "${opt}" in
     N) name="$OPTARG" ;;
     *)
         printf '%s: invalid option %s\n' "${myname}" "$opt" >&2
+        show_usage
         exit 1
     ;;
 esac done
