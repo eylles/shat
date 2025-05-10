@@ -41,10 +41,12 @@ show_usage () {
 ident=""
 name=""
 noheader=""
-while getopts "I:N:H" opt; do case "${opt}" in
+noborder=""
+while getopts "I:N:HB" opt; do case "${opt}" in
     I) ident=$(trim_iden "$OPTARG") ;;
     N) name="$OPTARG" ;;
     H) noheader=1 ;;
+    B) noborder=1 ;;
     *)
         printf '%s: invalid option %s\n' "${myname}" "$opt" >&2
         show_usage
@@ -68,18 +70,20 @@ printseparators() {
 prettyprintcmd() {
     iD="$1"
     shift 1
-    if [ -z "$noheader" ]; then
+    if [ -z "$noheader" ] && [ -z "$noborder" ]; then
         printseparators "top"
         printf '\033[30;1m%6s %s\033[0m \033[32;1m%s\033[0m \n' "$iD" "│" "$*"
         printseparators "mid"
-    else
+    elif [ -z "$noborder" ]; then
         printseparators "top"
     fi
     num=1
     while IFS= read -r REPLY; do
         printf '\033[30;1m%6d %s\033[0m %s \n' "$num" "│" "$REPLY"; num=$((num+1))
     done
-    printseparators "bot"
+    if [ -z "$noborder" ]; then
+        printseparators "bot"
+    fi
 }
 
 tmpfile="${TMPDIR:-/tmp}/${myname}_pipe_$$"
