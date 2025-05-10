@@ -38,15 +38,39 @@ show_usage () {
     printf 'usage: %s [OPTION] [FILE]\n' "${myname}"
 }
 
+show_help () {
+    printf '%s\n'   "${myname}: bat imitation with minimal dependencies"
+    show_usage
+    printf '\n%s\n'   "Options:"
+    printf '%s\n'     "-I S"
+    printf '\t%s\n'   "where 'S' is the identifier string."
+    printf '%s\n'     "-N S"
+    printf '\t%s\n'   "where 'S' is the file name string."
+    printf '%s\n'     "-H"
+    printf '\t%s\n'   "do not print header"
+    printf '%s\n'     "-B"
+    printf '\t%s\n'   "do not print top and bottom borders nor header"
+    printf '%s\n'     "-h"
+    printf '\t%s\n'   "show this message"
+    printf '\n%s\n'   "Hihghlighting:"
+    printf '\t%s%s\n' "by default the script will try to use either 'highlight'" \
+                      " or 'source-highlight'"
+    printf '\t%s\n'   "to use a different highlighter you have to set or export the \$HIGHLIGHTER"
+    printf '\t%s%s\n' "variable with your code highlighter of choice and the necessary flags" \
+                      " so that it"
+    printf '\t%s\n'   "will output in ANSI escape sequences."
+}
+
 ident=""
 name=""
 noheader=""
 noborder=""
-while getopts "I:N:HB" opt; do case "${opt}" in
+while getopts "I:N:HBh" opt; do case "${opt}" in
     I) ident=$(trim_iden "$OPTARG") ;;
     N) name="$OPTARG" ;;
     H) noheader=1 ;;
     B) noborder=1 ;;
+    h) show_help ; exit 0 ;;
     *)
         printf '%s: invalid option %s\n' "${myname}" "$opt" >&2
         show_usage
