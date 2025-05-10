@@ -40,9 +40,11 @@ show_usage () {
 
 ident=""
 name=""
-while getopts "I:N:" opt; do case "${opt}" in
+noheader=""
+while getopts "I:N:H" opt; do case "${opt}" in
     I) ident=$(trim_iden "$OPTARG") ;;
     N) name="$OPTARG" ;;
+    H) noheader=1 ;;
     *)
         printf '%s: invalid option %s\n' "${myname}" "$opt" >&2
         show_usage
@@ -66,9 +68,13 @@ printseparators() {
 prettyprintcmd() {
     iD="$1"
     shift 1
-    printseparators "top"
-    printf '\033[30;1m%6s %s\033[0m \033[32;1m%s\033[0m \n' "$iD" "│" "$*"
-    printseparators "mid"
+    if [ -z "$noheader" ]; then
+        printseparators "top"
+        printf '\033[30;1m%6s %s\033[0m \033[32;1m%s\033[0m \n' "$iD" "│" "$*"
+        printseparators "mid"
+    else
+        printseparators "top"
+    fi
     num=1
     while IFS= read -r REPLY; do
         printf '\033[30;1m%6d %s\033[0m %s \n' "$num" "│" "$REPLY"; num=$((num+1))
