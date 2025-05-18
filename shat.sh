@@ -28,6 +28,11 @@ else
     clnms=$(( SHBAT_COLS - margin ))
 fi
 
+# usage: is_num "value"
+is_num() {
+    printf %d "$1" >/dev/null 2>&1
+}
+
 # usage: trim_iden "value"
 #     will trim input to 6 chars
 trim_iden() {
@@ -46,6 +51,10 @@ show_help () {
     printf '\t%s\n'   "where 'S' is the identifier string."
     printf '%s\n'     "-N S"
     printf '\t%s\n'   "where 'S' is the file name string."
+    printf '%s\n'     "-c N"
+    printf '\t%s\n'   "where 'N' is the column width of the display area."
+    printf '\t%s\n'   "if not provided tput cols will be used to determine the display area"
+    printf '\t%s\n'   "when called from fzf the \$FZF_PREVIEW_COLUMNS variable is used instead."
     printf '%s\n'     "-H"
     printf '\t%s\n'   "do not print header"
     printf '%s\n'     "-B"
@@ -65,7 +74,15 @@ ident=""
 name=""
 noheader=""
 noborder=""
-while getopts "I:N:HBh" opt; do case "${opt}" in
+while getopts "c:I:N:HBh" opt; do case "${opt}" in
+    c)
+        if is_num "$OPTARG"; then
+            clnms=$(( OPTARG - margin ))
+        else
+            printf '%s: argument for -%s "%s" is not a number\n' "${myname}" "$opt" "$OPTARG" >&2
+            exit 1
+        fi
+    ;;
     I) ident=$(trim_iden "$OPTARG") ;;
     N) name="$OPTARG" ;;
     H) noheader=1 ;;
