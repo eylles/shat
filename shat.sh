@@ -131,12 +131,12 @@ done
 if [ -z "$pipearg" ]; then
     [ -z "$ident" ] && ident="File"
     if [ "$#" -gt 1 ]; then
-        /bin/cat "$@" | prettyprintcmd "$ident" "$@"
+        /bin/cat "$@" | fold -s -w "$clnms" | prettyprintcmd "$ident" "$@"
     else
-        $HIGHLIGHTER "$1" | prettyprintcmd "$ident" "$@"
+        fold -s -w "$clnms" "$1" | $HIGHLIGHTER | prettyprintcmd "$ident" "$@"
     fi
 else
     [ -z "$ident" ] && ident="Pipe"
     [ -z "$name" ] && name="${myname}-pipe $$"
-    $HIGHLIGHTER "$tmpfile" | prettyprintcmd "$ident" "$name"
+    fold -s -w "$clnms" "$tmpfile" | $HIGHLIGHTER | prettyprintcmd "$ident" "$name"
 fi
