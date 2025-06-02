@@ -17,6 +17,38 @@ case "$HIGHLIGHTER" in
     *highlight) HIGHLIGHTER="${HIGHLIGHTER} -O ansi --force" ;;
 esac
 
+# werether or not a pipe is being drained
+pipearg=""
+
+# usage: cat "file" | hi_li [file name]
+# highlighter wrapper
+# receives file from std in, can get file name as arg
+hi_li () {
+    if [ -z "$pipearg" ]; then
+        case "$HIGHLIGHTER" in
+            *highlight*)
+                # we may be reading a symlink, the symlink may not have an
+                # extension but the real file it points to could so we try
+                # to get that file name
+                file=$(readlink -f "$1")
+                file="${file##*/}"
+                ext="${file##*\.}"
+                # only do syntax by name if the file name got a real extension
+                if [ "$ext" != "$file" ]; then
+                    ${HIGHLIGHTER} --syntax-by-name "$file"
+                else
+                    ${HIGHLIGHTER}
+                fi
+            ;;
+            *)
+                ${HIGHLIGHTER}
+            ;;
+        esac
+    else
+        ${HIGHLIGHTER}
+    fi
+}
+
 # the columns on the left of the printable area
 margin=9
 
@@ -150,10 +182,10 @@ if [ -z "$pipearg" ]; then
     if [ "$#" -gt 1 ]; then
         /bin/cat "$@" | fold -s -w "$clnms" | prettyprintcmd "$ident" "$@"
     else
-        fold -s -w "$clnms" "$1" | $HIGHLIGHTER | prettyprintcmd "$ident" "$@"
+        fold -s -w "$clnms" "$1" | hi_li "$@" | prettyprintcmd "$ident" "$@"
     fi
 else
     [ -z "$ident" ] && ident="Pipe"
     [ -z "$name" ] && name="${myname}-pipe $$"
-    fold -s -w "$clnms" "$tmpfile" | $HIGHLIGHTER | prettyprintcmd "$ident" "$name"
+    fold -s -w "$clnms" "$tmpfile" | hi_li | prettyprintcmd "$ident" "$name"
 fi
