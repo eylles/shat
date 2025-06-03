@@ -182,7 +182,14 @@ if [ -z "$pipearg" ]; then
     if [ "$#" -gt 1 ]; then
         /bin/cat "$@" | fold -s -w "$clnms" | prettyprintcmd "$ident" "$@"
     else
-        fold -s -w "$clnms" "$1" | hi_li "$@" | prettyprintcmd "$ident" "$@"
+        case "$1" in
+            *.gz|*.zst|*.zip|*.tar|*.doc|*.deb|*.jar|*.7z)
+                lesspipe "$1" | fold -s -w "$clnms" | prettyprintcmd "$ident" "$@"
+            ;;
+            *)
+                fold -s -w "$clnms" "$1" | hi_li "$@" | prettyprintcmd "$ident" "$@"
+            ;;
+        esac
     fi
 else
     [ -z "$ident" ] && ident="Pipe"
