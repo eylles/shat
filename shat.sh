@@ -71,6 +71,12 @@ trim_iden() {
     printf '%.6s\n' "$1"
 }
 
+# wrap tree to use treeicons when available
+wtree () { tree "$@"; }
+if command -v treeicons >/dev/null; then
+    wtree () { treeicons "$@"; }
+fi
+
 show_usage () {
     printf 'usage: %s [OPTION] [FILE]\n' "${myname}"
 }
@@ -189,11 +195,12 @@ if [ -z "$pipearg" ]; then
             *)
                 if [ -d "$1" ]; then
                     if [ -z "$FZF_PREVIEW_LINES" ]; then
-                        tree "$1" | fold -s -w "$clnms" | prettyprintcmd "$ident" "$@"
+                        export NO_CONSTRAIN_TREEICONS=rowscols
+                        wtree "$1" | fold -s -w "$clnms" | prettyprintcmd "$ident" "$@"
                     else
                         rows="$FZF_PREVIEW_LINES"
                         rows=$(( rows - 4))
-                        tree "$1" | head -n "$rows" | fold -s -w "$clnms" | \
+                        wtree "$1" | head -n "$rows" | fold -s -w "$clnms" | \
                             prettyprintcmd "$ident" "$@"
                     fi
                 else
