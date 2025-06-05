@@ -187,7 +187,18 @@ if [ -z "$pipearg" ]; then
                 lesspipe "$1" | fold -s -w "$clnms" | prettyprintcmd "$ident" "$@"
             ;;
             *)
-                fold -s -w "$clnms" "$1" | hi_li "$@" | prettyprintcmd "$ident" "$@"
+                if [ -d "$1" ]; then
+                    if [ -z "$FZF_PREVIEW_LINES" ]; then
+                        tree "$1" | fold -s -w "$clnms" | prettyprintcmd "$ident" "$@"
+                    else
+                        rows="$FZF_PREVIEW_LINES"
+                        rows=$(( rows - 4))
+                        tree "$1" | head -n "$rows" | fold -s -w "$clnms" | \
+                            prettyprintcmd "$ident" "$@"
+                    fi
+                else
+                    fold -s -w "$clnms" "$1" | hi_li "$@" | prettyprintcmd "$ident" "$@"
+                fi
             ;;
         esac
     fi
