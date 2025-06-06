@@ -146,7 +146,7 @@ printseparators() {
     printf '\033[30;1m%s%s%s\033[0m\n' "$sepLeft" "$sepChar" "$sepRight"
 }
 
-prettyprintcmd() {
+pprint() {
     iD="$1"
     shift 1
     if [ -z "$noheader" ] && [ -z "$noborder" ]; then
@@ -186,25 +186,24 @@ done
 if [ -z "$pipearg" ]; then
     [ -z "$ident" ] && ident="File"
     if [ "$#" -gt 1 ]; then
-        /bin/cat "$@" | fold -s -w "$clnms" | prettyprintcmd "$ident" "$@"
+        /bin/cat "$@" | fold -s -w "$clnms" | pprint "$ident" "$@"
     else
         case "$1" in
             *.gz|*.zst|*.zip|*.tar|*.doc|*.deb|*.jar|*.7z)
-                lesspipe "$1" | fold -s -w "$clnms" | prettyprintcmd "$ident" "$@"
+                lesspipe "$1" | fold -s -w "$clnms" | pprint "$ident" "$@"
             ;;
             *)
                 if [ -d "$1" ]; then
                     if [ -z "$FZF_PREVIEW_LINES" ]; then
                         export NO_CONSTRAIN_TREEICONS=rowscols
-                        wtree "$1" | fold -s -w "$clnms" | prettyprintcmd "$ident" "$@"
+                        wtree "$1" | fold -s -w "$clnms" | pprint "$ident" "$@"
                     else
                         rows="$FZF_PREVIEW_LINES"
                         rows=$(( rows - 4))
-                        wtree "$1" | fold -s -w "$clnms" | head -n "$rows" | \
-                            prettyprintcmd "$ident" "$@"
+                        wtree "$1" | fold -s -w "$clnms" | head -n "$rows" | pprint "$ident" "$@"
                     fi
                 else
-                    fold -s -w "$clnms" "$1" | hi_li "$@" | prettyprintcmd "$ident" "$@"
+                    fold -s -w "$clnms" "$1" | hi_li "$@" | pprint "$ident" "$@"
                 fi
             ;;
         esac
@@ -212,5 +211,5 @@ if [ -z "$pipearg" ]; then
 else
     [ -z "$ident" ] && ident="Pipe"
     [ -z "$name" ] && name="${myname}-pipe $$"
-    fold -s -w "$clnms" "$tmpfile" | hi_li | prettyprintcmd "$ident" "$name"
+    fold -s -w "$clnms" "$tmpfile" | hi_li | pprint "$ident" "$name"
 fi
