@@ -189,23 +189,23 @@ if [ -z "$pipearg" ]; then
         /bin/cat "$@" | fold -s -w "$clnms" | pprint "$ident" "$@"
     else
         real_path=$(realpath "$1")
-        case "$real_path" in
-            *.gz|*.zst|*.zip|*.tar|*.doc|*.deb|*.jar|*.7z)
-                lesspipe "$real_path" | fold -s -w "$clnms" | pprint "$ident" "$@"
+        mime=$(file -b --mime-type "$real_path")
+        case "$mime" in
+            inode/directory)
+                if [ -z "$FZF_PREVIEW_LINES" ]; then
+                    export NO_CONSTRAIN_TREEICONS=rowscols
+                    wtree "$real_path" | fold -s -w "$clnms" | pprint "$ident" "$@"
+                else
+                    rows="$FZF_PREVIEW_LINES"
+                    rows=$(( rows - 4))
+                    wtree "$real_path" | fold -s -w "$clnms" | head -n "$rows" | pprint "$ident" "$@"
+                fi
+            ;;
+            application/mbox|text/*)
+                fold -s -w "$clnms" "$real_path" | hi_li "$@" | pprint "$ident" "$@"
             ;;
             *)
-                if [ -d "$real_path" ]; then
-                    if [ -z "$FZF_PREVIEW_LINES" ]; then
-                        export NO_CONSTRAIN_TREEICONS=rowscols
-                        wtree "$real_path" | fold -s -w "$clnms" | pprint "$ident" "$@"
-                    else
-                        rows="$FZF_PREVIEW_LINES"
-                        rows=$(( rows - 4))
-                        wtree "$real_path" | fold -s -w "$clnms" | head -n "$rows" | pprint "$ident" "$@"
-                    fi
-                else
-                    fold -s -w "$clnms" "$real_path" | hi_li "$@" | pprint "$ident" "$@"
-                fi
+                lesspipe "$real_path" | fold -s -w "$clnms" | pprint "$ident" "$@"
             ;;
         esac
     fi
