@@ -30,7 +30,7 @@ hi_li () {
                 # we may be reading a symlink, the symlink may not have an
                 # extension but the real file it points to could so we try
                 # to get that file name
-                file=$(readlink -f "$1")
+                file=$(realpath "$1")
                 file="${file##*/}"
                 ext="${file##*\.}"
                 # only do syntax by name if the file name got a real extension
@@ -188,22 +188,23 @@ if [ -z "$pipearg" ]; then
     if [ "$#" -gt 1 ]; then
         /bin/cat "$@" | fold -s -w "$clnms" | pprint "$ident" "$@"
     else
-        case "$1" in
+        real_path=$(realpath "$1")
+        case "$real_path" in
             *.gz|*.zst|*.zip|*.tar|*.doc|*.deb|*.jar|*.7z)
-                lesspipe "$1" | fold -s -w "$clnms" | pprint "$ident" "$@"
+                lesspipe "$real_path" | fold -s -w "$clnms" | pprint "$ident" "$@"
             ;;
             *)
-                if [ -d "$1" ]; then
+                if [ -d "$real_path" ]; then
                     if [ -z "$FZF_PREVIEW_LINES" ]; then
                         export NO_CONSTRAIN_TREEICONS=rowscols
-                        wtree "$1" | fold -s -w "$clnms" | pprint "$ident" "$@"
+                        wtree "$real_path" | fold -s -w "$clnms" | pprint "$ident" "$@"
                     else
                         rows="$FZF_PREVIEW_LINES"
                         rows=$(( rows - 4))
-                        wtree "$1" | fold -s -w "$clnms" | head -n "$rows" | pprint "$ident" "$@"
+                        wtree "$real_path" | fold -s -w "$clnms" | head -n "$rows" | pprint "$ident" "$@"
                     fi
                 else
-                    fold -s -w "$clnms" "$1" | hi_li "$@" | pprint "$ident" "$@"
+                    fold -s -w "$clnms" "$real_path" | hi_li "$@" | pprint "$ident" "$@"
                 fi
             ;;
         esac
